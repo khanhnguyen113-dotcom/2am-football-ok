@@ -269,8 +269,8 @@ export async function closePeriodAction(_: unknown, fd: FormData): Promise<Actio
 function matchPayload(fd: FormData) {
   const starts = localInputToIso(s(fd, "starts_at"));
   return {
-    opponent: s(fd, "opponent"), match_type: s(fd, "match_type") || "friendly", starts_at: starts,
-    ends_at: localInputToIso(s(fd, "ends_at")), venue_name: s(fd, "venue_name"), pitch_no: s(fd, "pitch_no") || null,
+    opponent: s(fd, "opponent") || "Chưa chốt đối thủ", match_type: s(fd, "match_type") || "friendly", starts_at: starts,
+    ends_at: null, venue_name: s(fd, "venue_name") || "Chưa chốt sân", pitch_no: s(fd, "pitch_no") || null,
     address: s(fd, "address") || null, map_url: s(fd, "map_url") || null, parking_note: s(fd, "parking_note") || null,
     pitch_cost_estimate: n(fd, "pitch_cost_estimate"), team_share_estimate: n(fd, "team_share_estimate"),
     rsvp_deadline: localInputToIso(s(fd, "rsvp_deadline")) ?? (starts ? new Date(new Date(starts).getTime() - 24 * 3600_000).toISOString() : null),
@@ -281,8 +281,9 @@ function matchPayload(fd: FormData) {
 export async function saveMatchAction(_: unknown, fd: FormData): Promise<ActionResult<{ id: string }>> {
   return withAdmin(async (db) => {
     const id = s(fd, "id");
+    if (!s(fd, "starts_at")) return { ok: false, error: "Chọn ngày giờ đá để tạo trận." };
     const p = matchPayload(fd);
-    if (!p.opponent || !p.starts_at || !p.venue_name) return { ok: false, error: "Cần tên đối thủ, giờ bắt đầu và sân." };
+    if (p.rsvp_deadline && p.starts_at && p.rsvp_deadline > p.starts_at) return { ok: false, error: "Hạn xác nhận cần trước hoặc bằng giờ đá." };
     if (id) {
       const { data, error } = await db.from("matches").update(p).eq("id", id).eq("version", n(fd, "version")).select("id");
       if (error) throw error;

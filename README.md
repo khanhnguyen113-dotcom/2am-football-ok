@@ -81,6 +81,40 @@ APP_URL=https://2am-football.vercel.app
 Lưu biến trước khi build; nếu sửa biến thì Redeploy vì `NEXT_PUBLIC_*` được đóng vào bản build.
 Không dùng URL Supabase local hoặc service-role/secret key trên Vercel.
 
+### Supabase đã chuyển sang danh sách thật (09/10/2026)
+
+Project `qtuqndmukmarqsbtqpad` đã áp dụng đủ 5 migration trong repository. `.env.local` trỏ đến project này bằng URL và publishable key; mật khẩu database và secret key chỉ dùng trong process bootstrap, không lưu trong app.
+
+- Quản trị duy nhất: `khasnhng@gmail.com`; đăng nhập tại `/admin/login` bằng mật khẩu chủ website đã chọn. Không đưa tài khoản kiểm thử local lên cloud.
+- Đã xóa dữ liệu mẫu và nhập đúng **27 thành viên thật** từ `supabase/initial-members.json`. Hồ sơ hoạt động, loại phí mặc định `standard` (Chính thức); vị trí, số áo và ảnh để trống, chưa tạo kỳ quỹ hay nghĩa vụ thu tiền.
+- Số dư, thu/chi, cam kết, khả dụng, công nợ và khoản chờ duyệt đều **0 ₫**. Chưa đặt số dư khởi tạo. Kỳ quỹ, sổ quỹ, biên lai, trận đấu, RSVP, đội hình, điểm danh/liên hoan, event thưởng, phạt, ủng hộ và thông báo mẫu đã xóa hết.
+- Đã xóa đủ **37 ảnh biên lai mẫu** qua Storage API; Storage hiện trống. Giữ nguyên schema, RPC, trigger, RLS, bucket, cấu hình đội/ngân hàng, danh mục vị trí và tài khoản Auth admin (bao gồm bản ghi mật khẩu).
+- Kiểm tra online sau chuyển đổi: danh sách công khai khớp đủ 27 tên; các bảng nghiệp vụ trống; tổng quỹ bằng 0; chỉ còn một Auth user; RPC kiểm tra quyền admin đạt; khách vẫn không đọc được bảng thành viên gốc. Không đăng nhập lại bằng mật khẩu admin trong lần dọn dữ liệu này.
+- Sao lưu trước khi xóa: 32 bảng và 37 ảnh đã kiểm tra SHA-256, lưu tại `supabase/.temp/before-live-2026-10-09T08-19-44-320Z/` (bỏ qua Git). Kết quả kiểm tra lưu trong `result.json`. Trước khi vận hành: rà loại phí thành viên, nhập số dư thực tế nếu có, mở kỳ quỹ thật và tạo trận thật trong admin.
+- Auth hosted hiện vẫn bật đăng ký mới (`disable_signup=false`). Cần tắt **Authentication → Sign In / Providers → Allow new users to sign up** trong Dashboard. Khóa database/secret key không có quyền đổi cấu hình quản lý project; chưa có phiên đăng nhập Dashboard trong trình duyệt của tác vụ. App không có màn hình signup và RLS vẫn chỉ cấp quyền quản trị cho đúng UUID đã cấu hình.
+
+Script `scripts/bootstrap-supabase-demo.cjs` tái sử dụng phần nghiệp vụ của seed local, bỏ hoàn toàn tài khoản Auth local và thay biên lai giả bằng file thật. Script mặc định chỉ kiểm tra; `--seed` mới ghi. Việc seed chạy trong transaction, có khóa chống chạy đồng thời, chặn database đã có nghiệp vụ và kiểm tra URL/API cùng project. Không cập nhật/xóa sổ quỹ. Bộ mẫu cố định tháng 10/2026; script chặn chạy vào tháng khác để tránh tạo lịch sử sai.
+
+`scripts/start-live-data.cjs` là thao tác chuyển đổi **một lần** cho đúng bộ demo đã xác minh của project này. Cần cờ `--apply-known-demo-reset`, `TASK_DATABASE_URL` và `TASK_SUPABASE_SECRET` trong process; script sao lưu DB/ảnh trước, dọn bảng nghiệp vụ và nhập danh sách trong transaction, rồi dọn Storage và kiểm tra. Sau khi đã chuyển sang danh sách thật, script sẽ từ chối chạy lại vì bộ dữ liệu không còn là demo. Không dùng script này để làm mới hệ thống đang vận hành.
+
+Chạy kiểm tra bằng PowerShell (nhập thông tin trong process, không ghi vào Git hoặc `.env.local`):
+
+```powershell
+$env:DEMO_ADMIN_EMAIL = 'EMAIL_QUAN_TRI'
+$env:DEMO_ADMIN_PASSWORD = 'MAT_KHAU_QUAN_TRI'
+npm run db:demo:verify
+```
+
+Để khởi tạo **project demo trống khác**, áp dụng migration bằng `supabase db push` trước, cấu hình `.env.local` tương ứng, rồi bổ sung biến bootstrap và chạy:
+
+```powershell
+$env:DEMO_DATABASE_URL = 'CHUOI_KET_NOI_POSTGRES_CUNG_PROJECT'
+$env:DEMO_SUPABASE_SECRET_KEY = 'SECRET_KEY_CUNG_PROJECT'
+npm run db:demo:seed
+```
+
+Lấy **Session pooler** từ Dashboard → Connect nếu máy không có IPv6. Không dùng `db reset --linked` và không chạy trực tiếp `seed.sql` trên project hosted. Không chạy lại seed để làm mới dữ liệu đã được người dùng sửa; dùng `db:demo:verify` để kiểm tra.
+
 ### Database phải triển khai riêng trước khi mở website
 
 Deploy Vercel không tự chạy migrations Supabase. Trong thư mục dự án:

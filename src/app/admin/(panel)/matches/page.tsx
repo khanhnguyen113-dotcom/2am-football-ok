@@ -41,7 +41,7 @@ export default async function AdminMatches() {
         </ul>
       </Panel>
       <Panel className="h-fit p-4">
-        <SectionHead title="Tạo trận" sub="Chi phí sân chỉ là dự toán — không tự ghi khoản chi." />
+        <SectionHead title="Tạo trận" sub="Chỉ cần ngày giờ đá. Đối thủ, sân và thông tin khác có thể bổ sung sau." />
         <AdminForm action={saveMatchAction} submit="Tạo trận">
           <MatchFields />
           <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="publish" className="accent-[#c8ff3c]" /> Công bố ngay (mở xác nhận)</label>

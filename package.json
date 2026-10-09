@@ -11,7 +11,9 @@
         "test": "vitest run",
         "test:unit": "vitest run tests/unit",
         "db:start": "supabase start",
-        "db:reset": "supabase db reset"
+        "db:reset": "supabase db reset",
+        "db:demo:seed": "node scripts/bootstrap-supabase-demo.cjs --seed",
+        "db:demo:verify": "node scripts/bootstrap-supabase-demo.cjs"
     },
     "dependencies": {
         "@supabase/ssr": "^0.12.7",
@@ -29,6 +31,7 @@
         "@types/react-dom": "^19",
         "eslint": "^9",
         "eslint-config-next": "16.4.0",
+        "pg": "^8.23.1",
         "postcss": "^8.5.29",
         "supabase": "^2.120.0",
         "tailwindcss": "^4",

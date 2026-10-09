@@ -109,6 +109,38 @@ describe("dues already included in the opening balance", () => {
     });
     expect(result.error?.code).toBe("23514");
   });
+
+  it("requires the admin, a note and the exact amount for a manual payment", async () => {
+    const args = { p_due_id: otherDueId, p_amount: 150000, p_note: "Chủ đội xác nhận đã nhận tiền." };
+    expect((await anon.rpc("admin_confirm_due_payment", args)).error).not.toBeNull();
+    expect((await outsider.rpc("admin_confirm_due_payment", args)).error?.message).toBe("FORBIDDEN");
+    expect((await admin.rpc("admin_confirm_due_payment", { ...args, p_note: "" })).error?.message).toBe("REASON_REQUIRED");
+    expect((await admin.rpc("admin_confirm_due_payment", { ...args, p_amount: 149000 })).error?.message).toBe("AMOUNT_MISMATCH");
+  });
+
+  it("marks paid and posts one income for simultaneous manual confirmations", async () => {
+    const before = (await anon.rpc("pub_fund_summary", { p_month: "2026-10" })).data.balance;
+    const args = { p_due_id: otherDueId, p_amount: 150000, p_note: "Chủ đội xác nhận đã nhận tiền; không có biên lai." };
+    const results = await Promise.all([1, 2].map(() => admin.rpc("admin_confirm_due_payment", args)));
+    results.forEach((r) => expect(r.error).toBeNull());
+    expect(results[0].data).toBe(results[1].data);
+    const id = results[0].data;
+    expect((await admin.from("payment_submissions").select("status, receipt_asset_id, transferred_at, method, admin_confirmation_note").eq("id", id).single()).data)
+      .toMatchObject({ status: "approved", receipt_asset_id: null, transferred_at: null, method: null, admin_confirmation_note: args.p_note });
+    expect((await admin.from("fund_ledger").select("id, amount").eq("source_id", id)).data).toHaveLength(1);
+    expect((await anon.rpc("pub_fund_summary", { p_month: "2026-10" })).data.balance).toBe(before + 150000);
+    expect((await admin.rpc("admin_approve_payment", { p_submission_id: id })).data).toMatchObject({ already: true });
+    expect((await anon.rpc("pub_fund_summary", { p_month: "2026-10" })).data.balance).toBe(before + 150000);
+  });
+
+  it("reverses a manual payment through the existing ledger correction workflow", async () => {
+    const { data: submission } = await admin.from("payment_submissions").select("id, member_id").eq("due_id", otherDueId).eq("status", "approved").single();
+    const { data: entry } = await admin.from("fund_ledger").select("id").eq("source_id", submission!.id).single();
+    const before = (await anon.rpc("pub_fund_summary", { p_month: "2026-10" })).data.balance;
+    expect((await admin.rpc("admin_reverse_ledger", { p_entry_id: entry!.id, p_reason: "Kiểm thử đảo khoản xác nhận thủ công" })).error).toBeNull();
+    expect((await anon.rpc("pub_fund_summary", { p_month: "2026-10" })).data.balance).toBe(before - 150000);
+    expect((await anon.from("pub_dues").select("status").eq("member_id", submission!.member_id).eq("obligation_month", "2026-07").single()).data!.status).toBe("unpaid");
+  });
 });
 
 describe("public read model (AT25)", () => {

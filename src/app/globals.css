@@ -1,0 +1,226 @@
+@import "tailwindcss";
+
+/* 2AM FC — "FC Ultimate" inspired dark theme. Brand colours are a configurable placeholder (guideline D08). */
+@theme {
+  --color-ink-950: #04090c;
+  --color-ink-900: #071217;
+  --color-ink-850: #0a1a20;
+  --color-ink-800: #0e232a;
+  --color-ink-700: #143039;
+  --color-ink-600: #1d4049;
+  --color-line: rgb(255 255 255 / 0.08);
+  --color-fg: #eef7f5;
+  --color-muted: #8fa9ad;
+  --color-dim: #5d7b80;
+  --color-neon: #c8ff3c;
+  --color-neon-deep: #8fd400;
+  --color-teal: #19e6c1;
+  --color-gold: #f3d27a;
+  --color-gold-deep: #b98a2a;
+  --color-violet: #8d5cff;
+  --color-pink: #ff4fa3;
+  --color-danger: #ff5c72;
+  --color-warn: #ffb547;
+  --color-info: #4cc9ff;
+
+  --font-display: var(--font-barlow), "Barlow Condensed", "Arial Narrow", sans-serif;
+  --font-sans: var(--font-bevn), "Be Vietnam Pro", system-ui, sans-serif;
+}
+
+:root {
+  color-scheme: dark;
+}
+
+html,
+body {
+  background: var(--color-ink-900);
+  color: var(--color-fg);
+}
+
+body {
+  font-family: var(--font-sans);
+  min-height: 100dvh;
+  background:
+    radial-gradient(1200px 600px at 85% -10%, rgb(25 230 193 / 0.14), transparent 60%),
+    radial-gradient(900px 500px at -10% 30%, rgb(141 92 255 / 0.12), transparent 60%),
+    linear-gradient(180deg, #08161b 0%, #050c10 100%);
+  background-attachment: fixed;
+}
+
+/* faint pitch lines like the FC menus */
+.pitch-bg::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.05;
+  background-image:
+    linear-gradient(90deg, transparent 49.8%, #fff 49.8%, #fff 50.2%, transparent 50.2%),
+    radial-gradient(circle at 50% 50%, transparent 119px, #fff 120px, #fff 122px, transparent 123px),
+    repeating-linear-gradient(115deg, transparent 0 140px, rgb(255 255 255 / 0.5) 140px 141px);
+  z-index: 0;
+}
+
+.font-display {
+  font-family: var(--font-display);
+  letter-spacing: 0.02em;
+}
+
+/* Glass panel with a clipped corner */
+.panel {
+  position: relative;
+  background: linear-gradient(160deg, rgb(20 48 57 / 0.72), rgb(8 20 25 / 0.82));
+  border: 1px solid var(--color-line);
+  border-radius: 14px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 10px 30px rgb(0 0 0 / 0.35), inset 0 1px 0 rgb(255 255 255 / 0.05);
+}
+.panel-cut {
+  clip-path: polygon(0 0, calc(100% - 18px) 0, 100% 18px, 100% 100%, 0 100%);
+}
+
+/* FC-style skewed button */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 44px;
+  padding: 0 1.1rem;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  border-radius: 8px;
+  transition: transform 0.12s ease, filter 0.12s ease, background 0.12s ease;
+  cursor: pointer;
+  user-select: none;
+}
+.btn:active {
+  transform: translateY(1px) scale(0.99);
+}
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.btn-primary {
+  color: #0a1300;
+  background: linear-gradient(180deg, #d9ff6a, var(--color-neon) 45%, var(--color-neon-deep));
+  box-shadow: 0 0 0 1px rgb(200 255 60 / 0.4), 0 8px 24px rgb(200 255 60 / 0.18);
+}
+.btn-primary:hover:not(:disabled) {
+  filter: brightness(1.07);
+}
+.btn-ghost {
+  color: var(--color-fg);
+  background: rgb(255 255 255 / 0.05);
+  border: 1px solid rgb(255 255 255 / 0.12);
+}
+.btn-ghost:hover:not(:disabled) {
+  background: rgb(255 255 255 / 0.1);
+}
+.btn-danger {
+  color: #fff;
+  background: linear-gradient(180deg, #ff7a8c, var(--color-danger));
+}
+.btn-sm {
+  min-height: 36px;
+  padding: 0 0.75rem;
+  font-size: 0.85rem;
+}
+
+.field {
+  width: 100%;
+  min-height: 44px;
+  padding: 0.55rem 0.8rem;
+  border-radius: 10px;
+  background: rgb(4 9 12 / 0.55);
+  border: 1px solid rgb(255 255 255 / 0.12);
+  color: var(--color-fg);
+  outline: none;
+  font-size: 16px;
+}
+.field:focus {
+  border-color: var(--color-neon);
+  box-shadow: 0 0 0 3px rgb(200 255 60 / 0.15);
+}
+select.field option {
+  background: #0e232a;
+}
+.label {
+  display: block;
+  margin-bottom: 0.3rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.section-title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.35rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+.section-title::before {
+  content: "";
+  width: 6px;
+  height: 1.1em;
+  border-radius: 2px;
+  background: linear-gradient(180deg, var(--color-neon), var(--color-teal));
+  transform: skewX(-12deg);
+}
+
+.glow-text {
+  text-shadow: 0 0 18px rgb(200 255 60 / 0.35);
+}
+
+/* Logo: grayscale crest blended so its dark backdrop melts into the UI */
+.crest {
+  mix-blend-mode: screen;
+  -webkit-mask-image: radial-gradient(circle at 50% 50%, #000 58%, transparent 72%);
+  mask-image: radial-gradient(circle at 50% 50%, #000 58%, transparent 72%);
+}
+
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-none {
+  scrollbar-width: none;
+}
+
+@keyframes shine {
+  0% { transform: translateX(-120%) skewX(-20deg); }
+  100% { transform: translateX(220%) skewX(-20deg); }
+}
+.shine::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  width: 40%;
+  background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.35), transparent);
+  animation: shine 3.2s ease-in-out infinite;
+  pointer-events: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .shine::after { animation: none; display: none; }
+}

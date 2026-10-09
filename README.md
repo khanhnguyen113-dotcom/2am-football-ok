@@ -64,7 +64,37 @@ Nguyên tắc chính:
 - Tiền: `numeric(14,0)` VND; sổ quỹ chỉ INSERT; khoản thu/chi tạo trong cùng transaction với thay đổi trạng thái, có `UNIQUE(source_type, source_id, operation)` + khóa hàng/advisory lock.
 - Upload khách: server kiểm tra magic bytes + SHA-256 → DB cấp đúng một object path → Storage policy chỉ cho INSERT path đó (không list/đọc/ghi đè) → RPC đối chiếu MIME/size thực.
 
-## Triển khai thật (chưa thực hiện)
+## Triển khai Vercel
+
+Repository: `https://github.com/khanhnguyen113-dotcom/2am-football-ok`, nhánh `main`.
+Import repository trong Vercel, để Root Directory ở thư mục gốc. `vercel.json` cấu hình Next.js, cài dependency bằng `npm ci` và build bằng `npm run build`.
+Production build dùng Webpack và Tailwind PostCSS. Không commit `.next` hoặc `.env.local`; Vercel tạo bản build từ source trên GitHub.
+
+Trong Settings → Environment Variables, đặt các biến cho Production (và Preview nếu dùng):
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=https://<project-ref>.supabase.co
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=<publishable key của cùng project>
+APP_URL=https://2am-football.vercel.app
+```
+
+Lưu biến trước khi build; nếu sửa biến thì Redeploy vì `NEXT_PUBLIC_*` được đóng vào bản build.
+Không dùng URL Supabase local hoặc service-role/secret key trên Vercel.
+
+### Database phải triển khai riêng trước khi mở website
+
+Deploy Vercel không tự chạy migrations Supabase. Trong thư mục dự án:
+
+```bash
+npx supabase login
+npx supabase link --project-ref <project-ref>
+npx supabase db push
+```
+
+Không dùng `--include-seed` hoặc `db reset --linked` trên production. Kiểm tra Supabase có view `pub_team` và các RPC `pub_fund_summary`, `pub_member_form`, `pub_unpaid`.
+Lỗi `PGRST205` / `PGRST202` ở các đối tượng này nghĩa là schema chưa sẵn sàng hoặc app trỏ nhầm project; trang công khai sẽ trả 500 dù build thành công.
+
+### Các bước vận hành
 
 1. Tạo project Supabase (staging trước), `npx supabase link` rồi `npx supabase db push` (**không** chạy `seed.sql`).
 2. Auth: tắt "Allow new users to sign up", tạo đúng một user quản trị trong Dashboard, bật MFA nếu có thể.

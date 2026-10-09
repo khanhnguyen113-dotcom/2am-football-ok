@@ -4,7 +4,7 @@
     "private": true,
     "scripts": {
         "dev": "next dev",
-        "build": "next build",
+        "build": "next build --webpack",
         "start": "next start",
         "lint": "eslint",
         "typecheck": "tsc --noEmit",
@@ -23,12 +23,13 @@
         "zod": "^4.6.5"
     },
     "devDependencies": {
-        "@tailwindcss/turbopack": "^4",
+        "@tailwindcss/postcss": "^4.3.3",
         "@types/node": "^24.19.1",
         "@types/react": "^19",
         "@types/react-dom": "^19",
         "eslint": "^9",
         "eslint-config-next": "16.4.0",
+        "postcss": "^8.5.29",
         "supabase": "^2.120.0",
         "tailwindcss": "^4",
         "typescript": "^5",

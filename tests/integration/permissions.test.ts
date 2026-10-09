@@ -48,6 +48,69 @@ beforeAll(async () => {
   expect(o.error).toBeNull();
 });
 
+describe("dues already included in the opening balance", () => {
+  let memberId: string;
+  let dueId: string;
+  let otherDueId: string;
+  const note = "Chủ đội xác nhận đã đóng trước khi chạy app; đã nằm trong số dư khởi tạo.";
+
+  beforeAll(async () => {
+    expect((await admin.rpc("admin_create_period", { p_month: "2026-07", p_due_date: "2026-07-05" })).error).toBeNull();
+    const ids: string[] = [];
+    for (const full_name of ["Thành viên xác nhận khởi tạo", "Thành viên chưa xác nhận khởi tạo"]) {
+      const result = await admin.rpc("admin_save_member", {
+        p_id: null, p_data: { full_name, fee_type: "standard" }, p_positions: [], p_primary: null, p_expected_version: null,
+      });
+      expect(result.error).toBeNull();
+      ids.push(result.data);
+    }
+    memberId = ids[0];
+    expect((await admin.rpc("admin_generate_dues", { p_month: "2026-07", p_member_ids: ids })).error).toBeNull();
+    const { data, error } = await admin.from("monthly_dues").select("id, member_id").eq("obligation_month", "2026-07");
+    expect(error).toBeNull();
+    dueId = data!.find((d) => d.member_id === ids[0])!.id;
+    otherDueId = data!.find((d) => d.member_id === ids[1])!.id;
+  });
+
+  it("allows only the configured admin and requires an explanation", async () => {
+    const args = { p_due_id: dueId, p_note: note };
+    expect((await anon.rpc("admin_confirm_opening_due", args)).error).not.toBeNull();
+    expect((await outsider.rpc("admin_confirm_opening_due", args)).error?.message).toBe("FORBIDDEN");
+    expect((await admin.rpc("admin_confirm_opening_due", { ...args, p_note: "" })).error?.message).toBe("REASON_REQUIRED");
+  });
+
+  it("confirms paid without a receipt or another income, even for concurrent retries", async () => {
+    const before = (await anon.rpc("pub_fund_summary", { p_month: "2026-10" })).data.balance;
+    const results = await Promise.all([1, 2].map(() => admin.rpc("admin_confirm_opening_due", { p_due_id: dueId, p_note: note })));
+    results.forEach((r) => expect(r.error).toBeNull());
+    expect(results[0].data).toBe(results[1].data);
+    const id = results[0].data;
+    const { data } = await admin.from("payment_submissions").select("*").eq("id", id).single();
+    expect(data).toMatchObject({ status: "approved", actor_kind: "admin", receipt_asset_id: null, transferred_at: null, method: null, opening_note: note });
+    expect(data!.opening_ledger_id).not.toBeNull();
+    expect((await anon.from("pub_dues").select("status").eq("member_id", memberId).eq("obligation_month", "2026-07").single()).data!.status).toBe("paid");
+    expect((await anon.rpc("pub_unpaid", { p_month: "2026-07" })).data.some((r: { member_id: string }) => r.member_id === memberId)).toBe(false);
+    expect((await admin.rpc("admin_approve_payment", { p_submission_id: id })).data).toMatchObject({ already: true });
+    expect((await admin.from("fund_ledger").select("id").eq("source_id", id)).data).toHaveLength(0);
+    expect((await anon.rpc("pub_fund_summary", { p_month: "2026-10" })).data.balance).toBe(before);
+    const duplicate = await anon.rpc("submit_public_payment", {
+      p_member_id: memberId, p_months: ["2026-07"], p_penalty_ids: [], p_amount: 150000,
+      p_transferred_at: new Date().toISOString(), p_receipt_asset_id: randomUUID(), p_request_id: randomUUID(),
+    });
+    expect(duplicate.error?.message).toBe("ALREADY_SUBMITTED");
+  });
+
+  it("keeps receipts mandatory for ordinary payments", async () => {
+    const { data } = await admin.from("monthly_dues").select("member_id").eq("id", otherDueId).single();
+    const result = await admin.from("payment_submissions").insert({
+      group_ref: randomUUID(), due_id: otherDueId, member_id: data!.member_id, amount: 150000,
+      transferred_at: new Date().toISOString(), method: "bank", receipt_asset_id: null,
+      actor_kind: "admin", request_id: randomUUID(),
+    });
+    expect(result.error?.code).toBe("23514");
+  });
+});
+
 describe("public read model (AT25)", () => {
   it("anon reads projections but not base tables", async () => {
     expect((await anon.from("pub_ledger").select("id").limit(1)).error).toBeNull();

@@ -8,6 +8,10 @@ import { createHash, randomUUID } from "node:crypto";
 
 const URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const KEY = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!;
+// Safety: these tests write data and rely on the demo seed — never run them against a hosted project.
+if (!/^http:\/\/(127\.0\.0\.1|localhost)(:\d+)?$/.test(URL ?? "")) {
+  throw new Error(`Integration tests only run against the local Supabase stack (got ${URL}). Check .env.test.local.`);
+}
 const client = () => createClient(URL, KEY, { auth: { persistSession: false, autoRefreshToken: false } });
 
 // seed.sql test values (local only)

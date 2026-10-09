@@ -7,7 +7,8 @@ export default defineConfig({
   test: {
     environment: "node",
     include: ["tests/**/*.test.ts"],
-    env: loadEnv("", process.cwd(), ""),
+    // mode "test" → .env.test.local (local Supabase) overrides .env.local (hosted project)
+    env: loadEnv("test", process.cwd(), ""),
     testTimeout: 20000,
     fileParallelism: false,
   },

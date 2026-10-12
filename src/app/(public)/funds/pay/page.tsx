@@ -29,7 +29,7 @@ export default async function PayPage() {
       <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
         <Panel className="p-5" cut>
           <PayForm options={options} dues={dues.map((d) => ({ member_id: d.member_id, obligation_month: d.obligation_month, amount_due: d.amount_due, status: d.status }))}
-            penalties={penalties.map((p) => ({ id: p.id, member_id: p.member_id, amount: p.amount, opponent: p.opponent, starts_at: p.starts_at, status: p.status }))}
+            penalties={penalties.map((p) => ({ id: p.id, member_id: p.member_id, amount: p.amount, opponent: p.opponent, starts_at: p.starts_at, status: p.status, reason: p.reason }))}
             currentMonth={vnMonth()} defaultMonth={target} noteTemplate={team.transfer_note_template} />
         </Panel>
         <Panel className="h-fit p-5 lg:sticky lg:top-6">

@@ -5,7 +5,7 @@ import { seasonRange, sp, type SP } from "@/server/view-helpers";
 import { FutCard, informSet, tierFor } from "@/components/fut-card";
 import { ProfileButton } from "@/components/public-forms";
 import { Empty, PageHeader, Tabs } from "@/components/ui";
-import { LINE_LABEL, POSITION_LINE, avatarUrl, displayName, type Line } from "@/lib/domain";
+import { LINE_LABEL, POSITION_LINE, MEMBER_STATUS_LABEL, avatarUrl, displayName, type Line } from "@/lib/domain";
 import { vnMonth } from "@/lib/format";
 
 export const metadata: Metadata = { title: "Thành viên" };
@@ -13,7 +13,7 @@ export const metadata: Metadata = { title: "Thành viên" };
 export default async function MembersPage({ searchParams }: { searchParams: SP }) {
   const q = await sp(searchParams);
   const line = (["GK", "DEF", "MID", "FWD"] as Line[]).includes(q.line as Line) ? (q.line as Line) : undefined;
-  const show = q.show === "all" ? "all" : "active";
+  const show = q.show === "all" || q.show === "paused" ? q.show : "active";
   const term = (q.q ?? "").trim().toLowerCase();
   const season = seasonRange();
   const [members, stats, rewards, form] = await Promise.all([getMembers(), getMemberStats(season.from, season.to), getRewards(), getMemberForm(vnMonth())]);
@@ -21,14 +21,14 @@ export default async function MembersPage({ searchParams }: { searchParams: SP }
   const inform = informSet(form);
 
   const list = members.filter((m) => {
-    if (show === "active" && m.status !== "active") return false;
+    if (show !== "all" && m.status !== show) return false;
     if (line && !m.positions.some((p) => POSITION_LINE[p] === line)) return false;
     if (term && !`${m.full_name} ${m.nickname ?? ""} ${m.shirt_number ?? ""}`.toLowerCase().includes(term)) return false;
     return true;
   });
   const link = (patch: Record<string, string | undefined>) => {
     const s = new URLSearchParams();
-    const next = { line, show: show === "all" ? "all" : undefined, q: q.q, ...patch };
+    const next = { line, show: show === "active" ? undefined : show, q: q.q, ...patch };
     Object.entries(next).forEach(([k, v]) => v && s.set(k, v));
     const str = s.toString();
     return `/members${str ? `?${str}` : ""}`;
@@ -49,7 +49,8 @@ export default async function MembersPage({ searchParams }: { searchParams: SP }
         <input name="q" defaultValue={q.q} placeholder="Tìm tên hoặc số áo…" className="field max-w-xs" />
         <select name="show" defaultValue={show} className="field w-auto">
           <option value="active">Đang hoạt động</option>
-          <option value="all">Gồm cả tạm ngừng/đã nghỉ</option>
+          <option value="paused">Nghỉ tạm</option>
+          <option value="all">Gồm cả nghỉ tạm/đã nghỉ</option>
         </select>
         <button className="btn btn-ghost">Lọc</button>
       </form>
@@ -65,6 +66,7 @@ export default async function MembersPage({ searchParams }: { searchParams: SP }
               </Link>
               <div className="mt-2 px-1">
                 <div className="truncate text-center text-xs text-muted">{m.full_name}</div>
+                {m.status !== "active" ? <div className="mt-1 text-center text-xs text-warn">{MEMBER_STATUS_LABEL[m.status]}</div> : null}
                 <div className="mt-1.5">
                   <ProfileButton memberId={m.id} fullName={m.full_name} nickname={m.nickname} version={m.version}
                     positions={m.positions} primary={m.primary_position} avatarUrl={avatarUrl(m.avatar_path)} />

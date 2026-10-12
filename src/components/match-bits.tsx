@@ -71,6 +71,7 @@ export function MatchHero({ m, teamName, compact }: { m: Match; teamName: string
 /** RSVP counters + grouping by preferred line to spot missing GK/defenders. */
 export function RsvpBoard({ rsvps, members }: { rsvps: Rsvp[]; members: PubMember[] }) {
   const active = members.filter((m) => m.status === "active");
+  const paused = members.filter((m) => m.status === "paused");
   const byMember = new Map(rsvps.map((r) => [r.member_id, r]));
   const resp = (id: string) => byMember.get(id)?.response ?? "no_response";
   const count = (k: string) => active.filter((m) => resp(m.id) === k).length;
@@ -82,6 +83,7 @@ export function RsvpBoard({ rsvps, members }: { rsvps: Rsvp[]; members: PubMembe
   const gYes = active.filter((m) => byMember.get(m.id)?.gathering_response === "yes").length;
   return (
     <div className="space-y-4">
+      <div className="text-xs text-muted">Cần vote: <b className="text-fg">{active.length}</b> thành viên đang hoạt động.</div>
       <div className="grid grid-cols-3 gap-2 text-center">
         {[
           ["yes", "Đi", "text-neon"], ["no", "Không", "text-danger"], ["no_response", "Chưa P.hồi", "text-muted"],
@@ -121,6 +123,13 @@ export function RsvpBoard({ rsvps, members }: { rsvps: Rsvp[]; members: PubMembe
           );
         })}
       </ul>
+      {paused.length > 0 ? (
+        <div className="rounded-lg bg-white/3 px-3 py-2 text-xs text-muted">
+          <div className="font-semibold text-fg">Nghỉ tạm ({paused.length}) · miễn vote</div>
+          <p className="mt-1">{paused.map(displayName).join(", ")}</p>
+          <p className="mt-1">Không tính vào số người cần vote hoặc chưa phản hồi; không bị phạt khi không vote.</p>
+        </div>
+      ) : null}
     </div>
   );
 }

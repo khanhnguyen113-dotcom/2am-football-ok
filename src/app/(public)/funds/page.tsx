@@ -178,7 +178,7 @@ async function PenaltiesTab({ members, amount }: { members: Awaited<ReturnType<t
   const mm = new Map(members.map((m) => [m.id, m]));
   return (
     <Panel className="p-4 sm:p-6">
-      <SectionHead title="Tiền phạt vắng mặt" sub={`Xác nhận tham gia nhưng điểm danh sau trận vắng mặt: phạt ${money(amount)}/trận.`}
+      <SectionHead title="Tiền phạt" sub={`Gồm phạt không vote và phạt xác nhận đi nhưng vắng mặt (${money(amount)}/trận vắng mặt).`}
         action={<Link href="/funds/penalty" className="btn btn-primary btn-sm">Nộp phạt</Link>} />
       {list.length === 0 ? <p className="text-sm text-muted">Chưa có khoản phạt nào.</p> : (
         <ul className="divide-y divide-white/5">
@@ -187,7 +187,7 @@ async function PenaltiesTab({ members, amount }: { members: Awaited<ReturnType<t
             const st = PENALTY_STATUS[p.status] ?? PENALTY_STATUS.unpaid;
             return (
               <li key={p.id} className="flex flex-wrap items-center justify-between gap-2 py-2.5 text-sm">
-                <span><b>{m ? displayName(m) : "—"}</b> <span className="text-muted">· vắng trận vs {p.opponent} ({fmtDate(p.starts_at)})</span></span>
+                <span><b>{m ? displayName(m) : "—"}</b> <span className="text-muted">· {p.reason} · vs {p.opponent} ({fmtDate(p.starts_at)})</span></span>
                 <span className="flex items-center gap-2">
                   {money(p.amount)} <Chip className={st.cls}>{st.label}</Chip>
                   {p.status === "unpaid" ? <Link href={`/funds/penalty?penalty=${p.id}`} className="btn btn-primary btn-sm">Nộp phạt</Link> : null}

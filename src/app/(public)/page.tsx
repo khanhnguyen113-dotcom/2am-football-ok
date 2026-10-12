@@ -80,7 +80,7 @@ export default async function HomePage({ searchParams }: { searchParams: SP }) {
         {next ? (
           <div className="space-y-6">
             <Panel className="p-4 sm:p-6" cut>
-              <SectionHead title="Xác nhận đi đá" sub={`Xác nhận đi mà vắng mặt bị phạt ${money(team.penalty_absent)}.`} />
+              <SectionHead title="Xác nhận đi đá" sub={`Không vote: phạt ${money(team.penalty_no_vote ?? 50000)}. Xác nhận đi mà vắng: phạt ${money(team.penalty_absent)}. HSSV miễn quỹ vẫn phải vote; nghỉ tạm được miễn.`} />
               <RsvpForm matchId={next.id} options={rsvpOptions(members)} closed={new Date(next.rsvp_deadline) < new Date()} />
             </Panel>
             <Panel className="p-4 sm:p-6">

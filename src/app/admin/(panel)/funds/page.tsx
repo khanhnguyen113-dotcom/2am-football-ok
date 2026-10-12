@@ -494,7 +494,7 @@ async function Penalties({ db, name }: { db: Db; name: (id: string | null) => st
   const { data } = await db.from("pub_penalties").select("*").order("starts_at", { ascending: false });
   return (
     <Panel className="p-4">
-      <SectionHead title="Tiền phạt vắng mặt" sub="Tự tạo khi lưu điểm danh: xác nhận Tham gia nhưng ghi Vắng mặt. Đổi điểm danh thì khoản chưa đóng tự hủy. Thành viên đóng qua form Đóng quỹ." />
+      <SectionHead title="Tiền phạt" sub="Phạt vắng mặt khi đã xác nhận đi; phạt không vote khi hoàn tất trận. HSSV miễn quỹ vẫn phải vote, nghỉ tạm được miễn vote. Thành viên đóng qua form Đóng quỹ." />
       {(data ?? []).length === 0 ? <Empty title="Chưa có khoản phạt" /> : (
         <ul className="space-y-2">
           {(data ?? []).map((p) => {
@@ -502,7 +502,7 @@ async function Penalties({ db, name }: { db: Db; name: (id: string | null) => st
             return (
               <li key={p.id} className="rounded-lg bg-white/4 px-3 py-2 text-sm">
                 <div className="flex flex-wrap items-center justify-between gap-2">
-                  <span><b>{name(p.member_id)}</b> · vắng trận vs {p.opponent} ({fmtDate(p.starts_at)})</span>
+                  <span><b>{name(p.member_id)}</b> · {p.reason} · vs {p.opponent} ({fmtDate(p.starts_at)})</span>
                   <span className="flex items-center gap-2">{money(p.amount)} <Chip className={st.cls}>{st.label}</Chip></span>
                 </div>
                 {p.status === "unpaid" ? (

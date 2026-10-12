@@ -377,6 +377,29 @@ describe("stats count only confirmed facts (AT12, AT16, AT17)", () => {
 
 describe("member types, absence penalties, donations, direct entries (v3)", () => {
   const PEN_MATCH = "20000000-0000-4000-8000-000000000003"; // M(6) confirmed yes, recorded absent in seed
+  it("a paused member without a vote is never fined, even if marked absent", async () => {
+    const created = await admin.rpc("admin_save_member", {
+      p_id: null, p_data: { full_name: "Thành viên nghỉ tạm", status: "paused" },
+      p_positions: [], p_primary: null, p_expected_version: null,
+    });
+    expect(created.error).toBeNull();
+    const memberId = created.data;
+    expect((await anon.from("pub_members").select("status").eq("id", memberId).single()).data?.status).toBe("paused");
+    const vote = await anon.rpc("set_public_rsvp", {
+      p_match_id: UPCOMING, p_member_id: memberId, p_response: "yes", p_gathering_response: "no",
+      p_position_code: "MID", p_note: null, p_request_id: randomUUID(),
+    });
+    expect(vote.error?.message).toBe("MEMBER_INACTIVE");
+    const attendance = await admin.rpc("admin_save_participation", {
+      p_match_id: PEN_MATCH, p_rows: [{ member_id: memberId, actual_status: "absent", positions: [], goals: null }],
+      p_score_us: 3, p_score_them: 1, p_post_note: null, p_attendance_complete: true,
+      p_complete_match: false, p_reason: "Kiểm tra miễn vote khi nghỉ tạm",
+    });
+    expect(attendance.error).toBeNull();
+    const penalties = await admin.from("penalties").select("id").eq("member_id", memberId);
+    expect(penalties.error).toBeNull();
+    expect(penalties.data).toHaveLength(0);
+  });
   it("fees follow member type and unpaid list skips exempt members", async () => {
     const { data } = await anon.rpc("pub_unpaid", { p_month: "2026-12" });
     const rows = data as { member_id: string; fee_type: string; amount: number }[];

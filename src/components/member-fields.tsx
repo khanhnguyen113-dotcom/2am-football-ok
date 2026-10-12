@@ -27,11 +27,13 @@ export function MemberFields({ m }: { m?: MemberEdit }) {
           <select name="status" defaultValue={m?.status ?? "active"} className="field">
             {Object.entries(MEMBER_STATUS_LABEL).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
           </select>
+          <span className="mt-1 block text-xs text-muted">Nghỉ tạm: không tính vào số người cần vote, không bị phạt khi không vote. Hết thời gian nghỉ, chuyển lại Đang hoạt động.</span>
         </label>
         <label><span className="label">Loại thành viên (mức quỹ)</span>
           <select name="fee_type" defaultValue={m?.fee_type ?? "standard"} className="field">
             {Object.entries(FEE_TYPE_LABEL).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
           </select>
+          <span className="mt-1 block text-xs text-muted">HSSV (miễn quỹ) vẫn phải vote khi đang hoạt động. Chỉ trạng thái Nghỉ tạm mới được miễn vote.</span>
         </label>
         <label><span className="label">Ảnh đại diện (JPG/PNG/WebP ≤ 5MB)</span><input name="avatar" type="file" accept="image/jpeg,image/png,image/webp" className="field" /></label>
       </div>

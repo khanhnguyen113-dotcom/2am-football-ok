@@ -18,10 +18,11 @@ export default async function PenaltyPayPage({ searchParams }: { searchParams: S
     <div className="mx-auto max-w-5xl">
       <PageHeader kicker="Không cần đăng nhập · 100% chuyển khoản" title="Nộp phạt">
         Xác nhận đi đá nhưng điểm danh sau trận vắng mặt bị phạt {money(team.penalty_absent)}/trận.
+        Không vote bị phạt {money(team.penalty_no_vote ?? 50000)}/trận, kể cả HSSV miễn quỹ. Thành viên nghỉ tạm được miễn vote.
       </PageHeader>
       <PenaltyPay
         names={names}
-        penalties={penalties.map((p) => ({ id: p.id, member_id: p.member_id, amount: p.amount, opponent: p.opponent, starts_at: p.starts_at, status: p.status }))}
+        penalties={penalties.map((p) => ({ id: p.id, member_id: p.member_id, amount: p.amount, opponent: p.opponent, starts_at: p.starts_at, status: p.status, reason: p.reason }))}
         initialId={q.penalty}
         noteTemplate={team.transfer_note_template}
         bank={<BankCard team={team} />}

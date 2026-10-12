@@ -12,7 +12,7 @@ function must<T>(res: { data: T | null; error: { message: string } | null }): T 
 }
 
 export type Team = {
-  team_name: string; tagline: string; monthly_fee: number; fee_student: number; fee_maintain: number; penalty_absent: number;
+  team_name: string; tagline: string; monthly_fee: number; fee_student: number; fee_maintain: number; penalty_absent: number; penalty_no_vote: number;
   due_day: number; collect_start_day: number; bank_name: string | null;
   bank_account_no: string | null; bank_account_name: string | null; transfer_note_template: string;
   default_formation: string; rsvp_hours_before: number; expense_categories: string[]; income_categories: string[];

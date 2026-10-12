@@ -36,7 +36,7 @@ export function slotLine(slot: string): Line {
 export const FOOT_LABEL: Record<string, string> = { left: "Trái", right: "Phải", both: "Cả hai", unknown: "Chưa cập nhật" };
 
 export const MEMBER_STATUS_LABEL: Record<string, string> = {
-  active: "Đang hoạt động", paused: "Tạm ngừng", left: "Đã nghỉ", archived: "Lưu trữ",
+  active: "Đang hoạt động", paused: "Nghỉ tạm", left: "Đã nghỉ", archived: "Lưu trữ",
 };
 
 export const RSVP_LABEL: Record<string, string> = { no_response: "Chưa phản hồi", yes: "Có", no: "Không" };
@@ -93,7 +93,7 @@ export const ATTEND_LABEL: Record<string, string> = {
 };
 
 export const FEE_TYPE_LABEL: Record<string, string> = {
-  standard: "Chính thức", student: "HSSV", maintain: "Duy trì (không đá)", exempt: "Miễn phí",
+  standard: "Chính thức", student: "HSSV", student_exempt: "HSSV (miễn quỹ)", maintain: "Duy trì (không đá)", exempt: "Miễn phí",
 };
 
 export const PENALTY_STATUS: Record<string, { label: string; cls: string }> = {

@@ -72,7 +72,7 @@ export default async function MatchPage({ params }: { params: Promise<{ id: stri
           </Panel>
           {open ? (
             <Panel className="h-fit p-5" cut>
-              <SectionHead title="Gửi xác nhận" sub={`Xác nhận đi mà vắng mặt bị phạt ${money(team.penalty_absent)}.`} />
+              <SectionHead title="Gửi xác nhận" sub={`Không vote: phạt ${money(team.penalty_no_vote ?? 50000)}. Xác nhận đi mà vắng: phạt ${money(team.penalty_absent)}. HSSV miễn quỹ vẫn phải vote; nghỉ tạm được miễn.`} />
               <RsvpForm matchId={match.id} options={rsvpOptions(members)} closed={new Date(match.rsvp_deadline) < new Date()} />
             </Panel>
           ) : null}

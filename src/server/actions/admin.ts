@@ -442,6 +442,7 @@ export async function saveSettingsAction(_: unknown, fd: FormData): Promise<Acti
     const { error } = await db.from("team_settings").update({
       team_name: s(fd, "team_name"), tagline: s(fd, "tagline"), monthly_fee: n(fd, "monthly_fee"), due_day: n(fd, "due_day"),
       fee_student: n(fd, "fee_student"), fee_maintain: n(fd, "fee_maintain"), penalty_absent: n(fd, "penalty_absent"),
+      penalty_no_vote: n(fd, "penalty_no_vote") ?? 50000,
       collect_start_day: n(fd, "collect_start_day"),
       bank_name: s(fd, "bank_name") || null, bank_account_no: s(fd, "bank_account_no") || null,
       bank_account_name: s(fd, "bank_account_name") || null, transfer_note_template: s(fd, "transfer_note_template"),

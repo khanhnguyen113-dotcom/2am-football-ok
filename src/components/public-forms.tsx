@@ -167,7 +167,7 @@ export function RsvpForm({ matchId, options, closed }: { matchId: string; option
 export type DueLite = { member_id: string; obligation_month: string; amount_due: number; status: string };
 type MonthOption = { month: string; amount: number; state: "open" | "pending" | "paid" | "exempt"; isNew: boolean };
 
-export type PenaltyLite = { id: string; member_id: string; amount: number; opponent: string; starts_at: string; status: string };
+export type PenaltyLite = { id: string; member_id: string; amount: number; opponent: string; starts_at: string; status: string; reason?: string };
 
 export function PayForm({ options, dues, penalties, currentMonth, defaultMonth, noteTemplate }: {
   options: (MemberOption & { name: string; active: boolean; fee: number })[]; dues: DueLite[]; penalties: PenaltyLite[];
@@ -260,7 +260,7 @@ export function PayForm({ options, dues, penalties, currentMonth, defaultMonth, 
 
       {myPenalties.length > 0 ? (
         <fieldset>
-          <legend className="label">Tiền phạt vắng mặt (xác nhận đi nhưng không có mặt)</legend>
+          <legend className="label">Tiền phạt (không vote hoặc xác nhận đi nhưng vắng mặt)</legend>
           <div className="grid gap-2 sm:grid-cols-2">
             {myPenalties.map((p) => {
               const open = p.status === "unpaid";
@@ -270,6 +270,7 @@ export function PayForm({ options, dues, penalties, currentMonth, defaultMonth, 
                   <input type="checkbox" name="penalties" value={p.id} disabled={!open} checked={checked} className="sr-only"
                     onChange={(e) => setPens((s) => (e.target.checked ? [...s, p.id] : s.filter((x) => x !== p.id)))} />
                   <span className="font-semibold">vs {p.opponent} · {fmtDate(p.starts_at)}</span>
+                  {p.reason ? <span className="text-xs text-muted">{p.reason}</span> : null}
                   <span className="text-xs text-muted">{money(p.amount)} · {open ? "Chưa đóng" : p.status === "pending" ? "Chờ duyệt" : "Đã xử lý"}</span>
                   {checked ? <span className="absolute right-2 top-2 text-danger">✓</span> : null}
                 </label>
@@ -388,7 +389,7 @@ export function PenaltyPay({ names, penalties, initialId, noteTemplate, bank }: 
                     <li key={p.id} className={`flex flex-wrap items-center justify-between gap-2 rounded-lg px-3 py-2 text-sm ${on ? "bg-danger/15" : "bg-black/20"}`}>
                       <label className="flex min-w-0 items-center gap-2">
                         {open ? <input type="checkbox" checked={on} onChange={(e) => toggle(p, e.target.checked)} className="accent-[#ff5d5d]" /> : null}
-                        <span className="min-w-0 truncate">Vắng trận vs {p.opponent} · {fmtDate(p.starts_at)}</span>
+                        <span className="min-w-0 truncate">{p.reason ?? "Xác nhận tham gia nhưng vắng mặt"} · vs {p.opponent} · {fmtDate(p.starts_at)}</span>
                       </label>
                       <span className="flex items-center gap-2">
                         <b className="tabular-nums">{money(p.amount)}</b>
@@ -416,7 +417,7 @@ export function PenaltyPay({ names, penalties, initialId, noteTemplate, bank }: 
             <div className="rounded-xl border border-danger/40 bg-danger/10 px-4 py-3">
               <div className="label mb-0">Số tiền cần chuyển · {names[memberId]}</div>
               <div className="font-display text-4xl font-black text-danger">{money(total)}</div>
-              <div className="text-xs text-muted">{chosen.length} khoản phạt vắng mặt</div>
+              <div className="text-xs text-muted">{chosen.length} khoản phạt</div>
             </div>
             {bank}
             <div className="rounded-xl border border-white/10 p-3 text-sm">

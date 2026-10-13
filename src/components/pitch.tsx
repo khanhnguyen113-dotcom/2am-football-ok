@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { formationSlots, POSITION_LINE, slotLine, displayName, type PubMember } from "@/lib/domain";
+import { FutCard } from "@/components/fut-card";
 
 /** Vertical sân-7 pitch; forwards on top, GK at the bottom. `render` lets admin screens put pickers in slots. */
 export function Pitch({
@@ -21,7 +22,7 @@ export function Pitch({
     <div
       className="relative mx-auto w-full max-w-md overflow-hidden rounded-2xl border border-white/10"
       style={{
-        aspectRatio: "0.78",
+        aspectRatio: render ? "0.78" : "0.5",
         background:
           "repeating-linear-gradient(180deg, rgb(255 255 255 / 0.035) 0 9%, transparent 9% 18%), radial-gradient(120% 80% at 50% 0%, #1f7a4d 0%, #0f4a30 55%, #0a2f20 100%)",
       }}
@@ -37,7 +38,7 @@ export function Pitch({
         {rows.map((row, i) => (
           <div key={i} className="flex items-center justify-evenly px-[4%]">
             {row.map((slot) => (
-              <div key={slot} className="flex w-[30%] max-w-[120px] justify-center">
+              <div key={slot} className={`flex justify-center ${render ? "w-[30%] max-w-[120px]" : "w-[26%] max-w-[90px]"}`}>
                 {render ? render(slot) : <PitchToken slot={slot} member={slots[slot] ? members.get(slots[slot]!) : undefined} />}
               </div>
             ))}
@@ -52,17 +53,18 @@ export function PitchToken({ slot, member }: { slot: string; member?: PubMember 
   const line = slotLine(slot);
   const off = member && member.positions.length > 0 && !member.positions.some((p) => POSITION_LINE[p] === line);
   return (
-    <div className="flex flex-col items-center text-center">
-      <div
-        className={`relative grid h-12 w-12 place-items-center rounded-full font-display text-xl font-black sm:h-14 sm:w-14 ${
-          member ? "text-[#2b1d03]" : "border-2 border-dashed border-white/40 text-white/60"
-        }`}
-        style={member ? { background: "linear-gradient(155deg,#fbe7a1,#e0b84f 50%,#a87a1e)", boxShadow: "0 4px 14px rgb(0 0 0 / .45)" } : undefined}
-      >
-        {member ? member.shirt_number ?? "•" : slot === "GK" ? "GK" : "+"}
+    <div className="flex w-full min-w-0 flex-col items-center text-center" title={member ? `${displayName(member)} · ${slotLabel(slot)}` : slotLabel(slot)}>
+      <div className="relative w-full">
+        {member ? (
+          <FutCard member={member} tier={member.status === "active" ? "gold" : "inactive"} compact position={line} />
+        ) : (
+          <div className="grid aspect-[0.7] w-full place-items-center rounded-lg border-2 border-dashed border-white/40 bg-black/15 font-display text-lg font-black text-white/60">
+            {slot === "GK" ? "GK" : "+"}
+          </div>
+        )}
         {off ? <span title="Xếp trái sở trường" className="absolute -right-1 -top-1 grid h-5 w-5 place-items-center rounded-full bg-warn text-[11px] font-bold text-black">!</span> : null}
       </div>
-      <div className="mt-1 w-full truncate rounded bg-black/55 px-1.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide">
+      <div className="mt-1 w-full truncate rounded bg-black/55 px-1 py-0.5 text-[10px] font-semibold">
         {member ? displayName(member) : slotLabel(slot)}
       </div>
     </div>

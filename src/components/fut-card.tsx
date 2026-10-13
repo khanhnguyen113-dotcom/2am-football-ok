@@ -62,11 +62,11 @@ export function Silhouette({ color, id }: { color: string; id: string }) {
 }
 
 export function FutCard({
-  member, stats, tier, footer, className,
-}: { member: PubMember; stats?: MemberStats; tier: Tier; footer?: ReactNode; className?: string }) {
+  member, stats, tier, footer, className, compact = false, position,
+}: { member: PubMember; stats?: MemberStats; tier: Tier; footer?: ReactNode; className?: string; compact?: boolean; position?: string }) {
   const t = TIER[tier];
   const img = avatarUrl(member.avatar_path);
-  const pos = member.primary_position ?? member.positions[0] ?? "—";
+  const pos = position ?? member.primary_position ?? member.positions[0] ?? "—";
   const s = stats;
   const cells: [string, string | number][] = [
     [String(s?.appearances ?? 0), "TRẬN"],
@@ -99,7 +99,7 @@ export function FutCard({
         </div>
 
         {/* photo */}
-        <div className="absolute right-[6%] top-[7%] h-[46%] w-[62%]">
+        <div className={`absolute right-[6%] top-[7%] w-[62%] ${compact ? "h-[64%]" : "h-[46%]"}`}>
           {img ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={img} alt={displayName(member)} className="h-full w-full object-cover object-top [mask-image:linear-gradient(180deg,#000_70%,transparent)]" />
@@ -109,20 +109,20 @@ export function FutCard({
         </div>
 
         {/* name */}
-        <div className="absolute inset-x-[8%] top-[53.5%] text-center">
-          <div className="truncate font-display font-black uppercase" style={{ fontSize: "10cqw", lineHeight: 1 }}>{displayName(member)}</div>
+        <div className={`absolute inset-x-[8%] text-center ${compact ? "top-[74%]" : "top-[53.5%]"}`}>
+          <div className="truncate font-display font-black uppercase" style={{ fontSize: compact ? "12cqw" : "10cqw", lineHeight: 1 }}>{displayName(member)}</div>
           <div className="mx-auto mt-[1.5cqw] h-px w-4/5" style={{ background: t.sub, opacity: 0.5 }} />
         </div>
 
         {/* stats */}
-        <div className="absolute inset-x-[11%] top-[64.5%] grid grid-cols-2 gap-x-[5cqw] gap-y-[0.4cqw] font-display" style={{ color: t.fg }}>
+        {!compact ? <div className="absolute inset-x-[11%] top-[64.5%] grid grid-cols-2 gap-x-[5cqw] gap-y-[0.4cqw] font-display" style={{ color: t.fg }}>
           {cells.map(([v, l], i) => (
             <div key={l} className={`flex items-baseline gap-[1.5cqw] ${i % 2 === 1 ? "border-l pl-[4cqw]" : ""}`} style={{ borderColor: `${t.sub}55` }}>
               <span className="font-black tabular-nums" style={{ fontSize: "7cqw" }}>{v}</span>
               <span className="font-semibold" style={{ fontSize: "4.6cqw", color: t.sub }}>{l}</span>
             </div>
           ))}
-        </div>
+        </div> : null}
 
         <div className="absolute bottom-[3.2%] left-1/2 -translate-x-1/2 font-display font-bold tracking-[0.25em]" style={{ fontSize: "3.6cqw", color: t.sub }}>
           {t.label}

@@ -3,6 +3,8 @@
 Dashboard công khai cho đội bóng sân 7 **2AM FC** (Next.js 16 + Supabase), triển khai theo `docs/2AM_FC_APP_GUIDELINE.md` v1.1.
 Giao diện tối phong cách EA FC (thẻ cầu thủ, sân 7, nút xiên), dùng logo đội tại `public/brand/logo.webp`.
 
+**Chế độ chỉ Quỹ đội:** `FUNDS_ONLY_MODE = true` trong `src/lib/features.ts` ẩn các mục trận đấu, đội hình, thành viên, BXH và thưởng trên cả menu công khai/quản trị; link cũ chuyển về Quỹ đội. Giữ thu–chi, đóng quỹ, nộp phạt, ủng hộ, cài đặt quỹ và audit. Không xóa mã hay dữ liệu. Để bật lại đầy đủ, đặt cờ thành `false`, build và triển khai lại.
+
 Thành viên xin nghỉ tạm: vào **Quản trị → Thành viên → hồ sơ → Trạng thái → Nghỉ tạm** và lưu. Thành viên nghỉ tạm được hiển thị riêng ở bảng vote, không tính vào số người cần vote/chưa phản hồi, không thể gửi vote và không bị phạt khi không vote. Khi hết thời gian nghỉ (ví dụ một tháng), quản trị chuyển lại **Đang hoạt động**; hiện chưa tự động hẹn ngày quay lại.
 
 **HSSV (miễn quỹ)** là loại phí riêng (`student_exempt`, 0đ), vẫn phải vote khi đang hoạt động. Không vote bị phạt **50.000đ/trận**, tính khi quản trị hoàn tất trận; chọn Có hoặc Không đều là đã vote. Quy tắc áp dụng cho trận có hạn vote từ lúc chạy migration `20261012000200` trở đi. Lịch sử trạng thái giúp giữ miễn vote cho thời gian nghỉ khi thành viên quay lại. Phạt đã trả/được miễn không bị viết lại; phạt xác nhận đi nhưng vắng mặt vẫn áp dụng như trước.

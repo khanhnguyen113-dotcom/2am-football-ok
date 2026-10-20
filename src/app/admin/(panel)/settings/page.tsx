@@ -5,6 +5,7 @@ import { AdminForm } from "@/components/admin-form";
 import { changePasswordAction, saveSettingsAction } from "@/server/actions/admin";
 import { Chip, Pager, Panel, SectionHead } from "@/components/ui";
 import { FORMATIONS } from "@/lib/domain";
+import { FUNDS_ONLY_MODE } from "@/lib/features";
 import { fmtDateTime } from "@/lib/format";
 
 export const metadata: Metadata = { title: "Cài đặt & audit" };
@@ -39,8 +40,8 @@ export default async function AdminSettings({ searchParams }: { searchParams: SP
               <label><span className="label">Số tài khoản</span><input name="bank_account_no" defaultValue={t?.bank_account_no ?? ""} className="field" /></label>
               <label><span className="label">Chủ tài khoản</span><input name="bank_account_name" defaultValue={t?.bank_account_name ?? ""} className="field" /></label>
               <label><span className="label">Mẫu nội dung CK ({"{ten}"}, {"{thang}"})</span><input name="transfer_note_template" defaultValue={t?.transfer_note_template} className="field" /></label>
-              <label><span className="label">Sơ đồ mặc định</span><select name="default_formation" defaultValue={t?.default_formation} className="field">{FORMATIONS.map((f) => <option key={f}>{f}</option>)}</select></label>
-              <label><span className="label">Hạn RSVP trước trận (giờ)</span><input name="rsvp_hours_before" type="number" min={0} max={168} defaultValue={t?.rsvp_hours_before} className="field" /></label>
+              <label hidden={FUNDS_ONLY_MODE}><span className="label">Sơ đồ mặc định</span><select name="default_formation" defaultValue={t?.default_formation} className="field">{FORMATIONS.map((f) => <option key={f}>{f}</option>)}</select></label>
+              <label hidden={FUNDS_ONLY_MODE}><span className="label">Hạn RSVP trước trận (giờ)</span><input name="rsvp_hours_before" type="number" min={0} max={168} defaultValue={t?.rsvp_hours_before} className="field" /></label>
               <label className="sm:col-span-2"><span className="label">Danh mục chi (phân cách dấu phẩy)</span><input name="expense_categories" defaultValue={(t?.expense_categories ?? []).join(", ")} className="field" /></label>
               <label className="sm:col-span-2"><span className="label">Danh mục thu khác</span><input name="income_categories" defaultValue={(t?.income_categories ?? []).join(", ")} className="field" /></label>
             </div>

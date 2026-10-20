@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { Crest } from "@/components/brand";
 import { requireAdminPage } from "@/server/admin";
 import { logoutAction } from "@/server/actions/admin";
+import { FUNDS_ONLY_MODE, isFundRoute } from "@/lib/features";
 
 export const metadata: Metadata = { title: { default: "Quản trị", template: "%s · Quản trị 2AM FC" }, robots: { index: false } };
 
@@ -26,9 +27,9 @@ export default async function AdminLayout({ children }: { children: React.ReactN
             <span className="font-display text-xl font-black uppercase italic">Admin <span className="text-neon">2AM</span></span>
           </Link>
           <nav className="scrollbar-none ml-2 flex flex-1 gap-1 overflow-x-auto">
-            {NAV.map((n) => (
+            {NAV.filter((n) => !FUNDS_ONLY_MODE || isFundRoute(n.href)).map((n) => (
               <Link key={n.href} href={n.href} className="shrink-0 rounded-lg px-3 py-2 font-display text-sm font-bold uppercase tracking-wider text-muted hover:bg-white/5 hover:text-fg">
-                {n.label}
+                {FUNDS_ONLY_MODE && n.href === "/admin/settings" ? "Cài đặt quỹ & audit" : n.label}
               </Link>
             ))}
           </nav>

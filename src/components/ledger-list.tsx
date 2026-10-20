@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { LedgerRow } from "@/server/public-data";
 import { fmtDate, money, monthLabel } from "@/lib/format";
 import { Chip, Empty } from "@/components/ui";
+import { FUNDS_ONLY_MODE } from "@/lib/features";
 
 /** Public ledger rows as mobile-friendly cards (no receipts, account numbers or private notes). */
 export function LedgerList({ rows, emptyTitle = "Chưa có khoản chi trong kỳ" }: { rows: LedgerRow[]; emptyTitle?: string }) {
@@ -28,7 +29,7 @@ export function LedgerList({ rows, emptyTitle = "Chưa có khoản chi trong k�
                 {isRev ? <Chip className="bg-warn/15 text-warn">Điều chỉnh</Chip> : null}
                 {r.reversed_by ? <Chip className="bg-warn/15 text-warn">Đã được điều chỉnh</Chip> : null}
                 {lateNote ? <span className="text-dim">· ghi sổ {monthLabel(r.posting_month)}</span> : null}
-                {r.match_id && r.match_opponent ? (
+                {!FUNDS_ONLY_MODE && r.match_id && r.match_opponent ? (
                   <Link href={`/matches/${r.match_id}`} className="text-teal hover:underline">· trận vs {r.match_opponent}</Link>
                 ) : null}
               </div>

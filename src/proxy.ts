@@ -1,9 +1,18 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
+import { hiddenFeatureRedirect } from "@/lib/features";
 
 // Refreshes the admin session cookie on /admin/* and sends anonymous visitors to the login page.
 // This is UX only — every admin command re-checks the admin user ID inside the database.
 export async function proxy(request: NextRequest) {
+  const destination = hiddenFeatureRedirect(request.nextUrl.pathname);
+  if (destination) {
+    const url = request.nextUrl.clone();
+    url.pathname = destination;
+    url.search = "";
+    return NextResponse.redirect(url);
+  }
+  if (!request.nextUrl.pathname.startsWith("/admin")) return NextResponse.next({ request });
   let response = NextResponse.next({ request });
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -31,5 +40,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin/:path*"],
+  matcher: ["/", "/matches/:path*", "/members/:path*", "/stats/:path*", "/events/:path*", "/admin/:path*"],
 };

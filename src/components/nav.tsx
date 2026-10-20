@@ -3,22 +3,26 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
+import { FUNDS_ONLY_MODE, isFundRoute } from "@/lib/features";
 
 type Item = { href: string; label: string; full?: string; icon: keyof typeof ICONS };
 
-const MAIN: Item[] = [
+const ALL_MAIN: Item[] = [
   { href: "/", label: "Trang chủ", icon: "home" },
   { href: "/matches", label: "Trận đấu", icon: "ball" },
   { href: "/funds", label: "Quỹ đội", icon: "wallet" },
   { href: "/stats", label: "BXH", full: "Bảng xếp hạng", icon: "chart" },
 ];
-const MORE: Item[] = [
+const ALL_MORE: Item[] = [
   { href: "/members", label: "Thành viên", icon: "users" },
   { href: "/events", label: "Thưởng", icon: "trophy" },
   { href: "/funds/pay", label: "Đóng quỹ", icon: "upload" },
   { href: "/funds/penalty", label: "Nộp phạt", icon: "shield" },
   { href: "/donate", label: "Ủng hộ", icon: "heart" },
 ];
+
+const MAIN = ALL_MAIN.filter((item) => !FUNDS_ONLY_MODE || isFundRoute(item.href));
+const MORE = ALL_MORE.filter((item) => !FUNDS_ONLY_MODE || isFundRoute(item.href));
 
 const ICONS = {
   home: "M3 11 12 4l9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z",
@@ -94,7 +98,7 @@ export function BottomNav() {
         </div>
       ) : null}
       <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-white/10 bg-ink-950/90 backdrop-blur-md lg:hidden" aria-label="Điều hướng">
-        <div className="mx-auto grid max-w-lg grid-cols-5 pb-[env(safe-area-inset-bottom)]">
+        <div className={`mx-auto grid max-w-lg pb-[env(safe-area-inset-bottom)] ${FUNDS_ONLY_MODE ? "grid-cols-2" : "grid-cols-5"}`}>
           {MAIN.map((it) => {
             const active = isActive(path, it.href);
             return (
